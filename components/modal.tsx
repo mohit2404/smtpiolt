@@ -19,12 +19,12 @@ export const Modal = forwardRef<HTMLDivElement, ModalProps>(
     return (
       <div className="fixed inset-0 z-50 flex items-center justify-center">
         <div
-          className="bg-opacity-50 fixed inset-0 bg-black"
+          className="bg-opacity-50 fixed inset-0 bg-black/75 backdrop-blur-sm"
           onClick={onClose}
         />
         <div
           ref={ref}
-          className="relative w-full max-w-2xl overflow-y-auto rounded-xl bg-white shadow-xl"
+          className="relative max-h-[75vh] w-full max-w-2xl overflow-hidden rounded-xl bg-white shadow-xl"
         >
           {children}
         </div>

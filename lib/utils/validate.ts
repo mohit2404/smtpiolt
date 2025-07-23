@@ -17,3 +17,19 @@ export function validateEmailBatch(params: EmailBatch): string | null {
   if (!params.smtpConfig.host) return "SMTP host is required";
   return null;
 }
+
+export function validateEmail(email: string): boolean {
+  return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+}
+
+export function isFakeEmail(email: string): boolean {
+  const fakePatterns = [
+    "example.com",
+    "test.com",
+    "fake.com",
+    "mailinator.com",
+    "tempmail.com",
+    "yopmail.com",
+  ];
+  return fakePatterns.some((pattern) => email.endsWith(`@${pattern}`));
+}
