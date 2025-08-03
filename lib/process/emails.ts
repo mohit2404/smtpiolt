@@ -1,28 +1,24 @@
-import supabase from "@/lib/supabase/server";
 import {
   createEmailTransporter,
   formatEmailContent,
   sendSingleEmail,
 } from "@/lib/utils/nodemailer";
+import {
+  getBatchById,
+  getBatchEmailLogs,
+  updateBatchStatus,
+  updateEmailLogStatus,
+} from "../firebase/functions";
 
 export async function processEmailBatch(batchId: string) {
   try {
-    const { data: batch, error: batchError } = await supabase
-      .from("email_batches")
-      .select("*")
-      .eq("id", batchId)
-      .single();
-
+    const { data: batch, error: batchError } = await getBatchById(batchId);
     if (batchError || !batch) {
       console.error("Batch not found:", batchError);
       return;
     }
 
-    const { data: logs, error: logsError } = await supabase
-      .from("email_logs")
-      .select("*")
-      .eq("batch_id", batchId);
-
+    const { data: logs, error: logsError } = await getBatchEmailLogs(batchId);
     if (logsError || !logs) {
       console.error("Failed to get recipients:", logsError);
       return;
@@ -63,50 +59,36 @@ export async function processEmailBatch(batchId: string) {
       };
 
       try {
-        const { messageId } = await sendSingleEmail(
-          transporter,
-          emailOptions,
-        );
+        const { messageId } = await sendSingleEmail(transporter, emailOptions);
 
-        await supabase
-          .from("email_logs")
-          .update({
-            status: "success",
-            message_id: messageId,
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", recipient.id);
+        await updateEmailLogStatus(batchId, recipient.recipient, {
+          status: "success",
+          message_id: messageId,
+          error: null,
+          updated_at: new Date().toISOString(),
+        });
 
         totalSent++;
       } catch (err: any) {
         console.error(`Failed to send to ${recipient.recipient}:`, err.message);
 
-        await supabase
-          .from("email_logs")
-          .update({
-            status: "error",
-            error: err.message || "Unknown error",
-            updated_at: new Date().toISOString(),
-          })
-          .eq("id", recipient.id);
+        await updateEmailLogStatus(batchId, recipient.recipient, {
+          status: "error",
+          message_id: null,
+          error: err.message || "Unknown error",
+          updated_at: new Date().toISOString(),
+        });
 
         totalFailed++;
       }
     }
 
-    await supabase
-      .from("email_batches")
-      .update({
-        status: "completed",
-        total_sent: totalSent,
-        total_failed: totalFailed,
-        completed_at: new Date().toISOString(),
-      })
-      .eq("id", batchId);
-
-    console.log(
-      `Finished batch ${batchId}: Sent=${totalSent}, Failed=${totalFailed}`,
-    );
+    await updateBatchStatus(batchId, {
+      status: "completed",
+      total_sent: totalSent,
+      total_failed: totalFailed,
+      completed_at: new Date().toISOString(),
+    });
   } catch (err: any) {
     console.error("Fatal error in batch processing:", err.message || err);
     return;

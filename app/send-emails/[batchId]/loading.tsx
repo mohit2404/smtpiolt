@@ -1,22 +1,32 @@
-import { Package, Mail, User, Tag, Info, CheckCircle2 } from "lucide-react";
+import { Container } from "@/components/container";
+import {
+  Package,
+  Mail,
+  User,
+  Tag,
+  Info,
+  CheckCircle2,
+  CircleX,
+} from "lucide-react";
 
 export default function Loading() {
-  const icons = [User, Tag, Info, Mail, CheckCircle2];
+  const icons = [User, Tag, Info, Mail, CheckCircle2, CircleX];
 
   return (
     <section>
-      <div className="container mx-auto min-h-screen px-4 py-8 md:px-6 lg:px-8">
+      <Container className="py-7">
         {/* Batch Header Skeleton */}
         <div className="mb-8 flex animate-pulse items-center gap-3">
           <Package className="h-8 w-8 text-gray-300" />
           <div className="h-8 w-64 rounded bg-gray-200"></div>
         </div>
+
         {/* Batch Summary Card Skeleton */}
-        <div className="animate-pulse border p-6 shadow-lg">
+        <div className="animate-pulse rounded-xl border p-6 shadow-lg">
           <div className="mb-4 h-6 w-48 rounded bg-gray-200"></div>
           <div className="grid gap-4">
             <div className="grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2">
-              {Array.from({ length: 5 }).map((_, i) => {
+              {Array.from({ length: 6 }).map((_, i) => {
                 const Icon = icons[i];
                 return (
                   <div key={i} className="flex items-center gap-2">
@@ -32,13 +42,13 @@ export default function Loading() {
                 <div className="h-4 w-20 rounded bg-gray-200"></div>
                 <div className="h-4 w-12 rounded bg-gray-200"></div>
               </div>
-              <div className="h-2 w-full rounded bg-gray-200"></div>
+              <div className="h-2.5 w-full rounded bg-gray-200"></div>
             </div>
           </div>
         </div>
 
         {/* Email Details Section Skeleton */}
-        <div className="grid gap-6">
+        <div className="mt-8 grid gap-6">
           <h2 className="text-xl font-semibold tracking-tight text-gray-800">
             <div className="h-6 w-40 rounded bg-gray-200"></div>
           </h2>
@@ -65,7 +75,7 @@ export default function Loading() {
             </div>
           ))}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }

@@ -64,8 +64,6 @@ export const metadata: Metadata = {
     title: "Smtpilot – Smart Email Campaign Manager",
     description:
       "Send email campaigns with ease. Powered by Supabase + Next.js.",
-    site: "@smtpilot",
-    creator: "@smtpilot",
     images: ["/nikolay-loubet-b12IBsX54dU.jpg"],
   },
   metadataBase: new URL(

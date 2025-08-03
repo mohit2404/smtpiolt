@@ -2,18 +2,7 @@ import { EmailBatch, SMTPConfig } from "@/lib/types";
 import apiClient from "@/lib/utils/axios";
 
 class ApiHandler {
-  // fetch data of a batchId
-  async fetchBatch(batchId: string) {
-    try {
-      const res = await apiClient.get(`/api/process-batch/${batchId}`);
-      return res.data;
-    } catch (error) {
-      console.error("Error in fetchBatch:", error);
-      throw error;
-    }
-  }
-
-  // fetch data of a batchId
+  // test smtp connection
   async testSmtpConnection(smtpConfig: SMTPConfig) {
     try {
       const res = await apiClient.post(`/api/test-smtp`, { smtpConfig });
@@ -24,7 +13,7 @@ class ApiHandler {
     }
   }
 
-  // fetch data of a batchId
+  // process email batch
   async processEmailBatch(params: EmailBatch) {
     try {
       const res = await apiClient.post(`/api/process-batch`, {

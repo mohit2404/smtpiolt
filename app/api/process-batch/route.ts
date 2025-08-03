@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import supabase from "@/lib/supabase/server";
-import { v4 as uuidv4 } from "uuid";
+import { nanoid } from "nanoid";
 import { processEmailBatch } from "@/lib/process/emails";
+import { createEmailLogs, createEmailBatch } from "@/lib/firebase/functions";
+import { Batch } from "@/lib/types";
 
 export async function POST(req: Request) {
   try {
@@ -17,16 +18,13 @@ export async function POST(req: Request) {
     if (!senderEmail || !subject || !message || !recipients?.length) {
       return NextResponse.json(
         { error: "Missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
-    // Step 1: Create batch record
-    const batchId = uuidv4();
+    const batchId = nanoid();
 
-    // step 2: insert batch record in supabase
-    const { error: batchError } = await supabase.from("email_batches").insert({
-      id: batchId,
+    const batchRes = await createEmailBatch(batchId, {
       sender_email: senderEmail,
       sender_name: senderName || null,
       subject,
@@ -36,53 +34,37 @@ export async function POST(req: Request) {
       total_sent: 0,
       total_failed: 0,
       created_at: new Date().toISOString(),
-    });
+    } as Batch);
 
-    if (batchError) {
-      console.error("Failed to insert batch:", batchError);
+    if (!batchRes.status) {
+      console.error("Failed to create batch:", batchRes.error);
       return NextResponse.json(
         { error: "Failed to create email batch" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
-    // Step 3: Insert all recipients in supabase
-    const logs = recipients.map((r: any) => ({
-      batch_id: batchId,
-      recipient: r.email,
-      name: r.name || null,
-      status: "pending",
-      updated_at: new Date().toISOString(),
-    }));
-
-    const { error: logsError } = await supabase.from("email_logs").insert(logs);
-
-    if (logsError) {
-      console.error("Failed to insert email logs:", logsError.message);
+    // Insert all recipients
+    const recipientsRes = await createEmailLogs(batchId, recipients);
+    if (!recipientsRes.status) {
+      console.error("Failed to insert recipients:", recipientsRes.error);
       return NextResponse.json(
-        { error: "Failed to save email recipients" },
-        { status: 500 }
+        { error: "Failed to insert recipients" },
+        { status: 500 },
       );
     }
 
-    // step 4: start processing emails in the background
+    // Start background email sending
     setTimeout(() => {
       processEmailBatch(batchId);
     }, 0);
 
-    // return the batch id and message early
     return NextResponse.json(
-      {
-        batchId: batchId,
-        message: "Batch created and processing started",
-      },
-      { status: 200 }
+      { batchId, message: "Processing started" },
+      { status: 200 },
     );
   } catch (err: any) {
-    console.error("Error in send-bulk-emails route:", err);
-    return NextResponse.json(
-      { error: err.message || "Server error" },
-      { status: 500 }
-    );
+    console.error("Error:", err);
+    return NextResponse.json({ error: err.message }, { status: 500 });
   }
 }

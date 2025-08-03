@@ -1,16 +1,22 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
-import supabase from "@/lib/supabase/client";
+import { useMemo } from "react";
 import { useParams } from "next/navigation";
-import { Package, Mail, User, Tag, Info, CheckCircle2 } from "lucide-react";
-import { apiHandler } from "@/lib/class/apiHandler";
-import Head from "next/head";
+import {
+  Package,
+  Mail,
+  User,
+  Tag,
+  Info,
+  CheckCircle2,
+  CircleX,
+} from "lucide-react";
+import { useBatchRealtime } from "@/hooks/useBatchRealtime";
+import { Container } from "@/components/container";
 
 export default function BatchPageClient() {
   const { batchId } = useParams<{ batchId: string }>();
-  const [recipients, setRecipients] = useState<any[]>([]);
-  const [batch, setBatch] = useState<any>(null);
+  const { batch, recipients } = useBatchRealtime(batchId);
 
   // Count
   const total = recipients.length;
@@ -18,111 +24,14 @@ export default function BatchPageClient() {
     () => recipients.filter((r) => r.status === "success").length,
     [recipients],
   );
-  // const errorCount = useMemo(
-  //   () => recipients.filter((r) => r.status === "error").length,
-  //   [recipients],
-  // );
-
-  useEffect(() => {
-    // 1. Initial fetch
-    const fetchData = async () => {
-      const data = await apiHandler.fetchBatch(batchId);
-      setBatch(data);
-      setRecipients(data.recipients || []);
-    };
-
-    fetchData();
-
-    // 2. Listen for updates in email_logs
-    const logsChannel = supabase
-      .channel(`realtime:email_logs:${batchId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "email_logs",
-          filter: `batch_id=eq.${batchId}`,
-        },
-        (payload: any) => {
-          const updated = payload.new;
-          setRecipients((prev) =>
-            prev.map((r) =>
-              r.id === updated.id
-                ? {
-                    ...r,
-                    status: updated.status,
-                    messageId: updated.message_id,
-                    error: updated.error,
-                  }
-                : r,
-            ),
-          );
-        },
-      )
-      .subscribe();
-
-    // 3. Listen for updates in email_batches
-    const batchChannel = supabase
-      .channel(`realtime:email_batches:${batchId}`)
-      .on(
-        "postgres_changes",
-        {
-          event: "UPDATE",
-          schema: "public",
-          table: "email_batches",
-          filter: `id=eq.${batchId}`,
-        },
-        (payload: any) => {
-          setBatch((prev: any) => ({
-            ...prev,
-            ...payload.new,
-          }));
-        },
-      )
-      .subscribe();
-
-    return () => {
-      supabase.removeChannel(logsChannel);
-      supabase.removeChannel(batchChannel);
-    };
-  }, [batchId]);
-
-  // const getStatusBadge = (status: string) => {
-  //   switch (status) {
-  //     case "success":
-  //       return (
-  //         <div className="bg-green-100 text-green-800">
-  //           <CheckCircle2 className="mr-1 h-3 w-3" /> Success
-  //         </div>
-  //       );
-  //     case "in_progress":
-  //       return (
-  //         <div className="bg-yellow-100 text-yellow-800">
-  //           <Info className="mr-1 h-3 w-3" /> In Progress
-  //         </div>
-  //       );
-  //     case "failed":
-  //       return <div>Failed</div>;
-  //     case "pending":
-  //       return <div>Pending</div>;
-  //     default:
-  //       return <div>{status}</div>;
-  //   }
-  // };
+  const errorCount = useMemo(
+    () => recipients.filter((r) => r.status === "error").length,
+    [recipients],
+  );
 
   return (
     <section>
-      <Head>
-        <title>Email Delivery Logs for {batchId}</title>
-        <meta
-          name="description"
-          content={`View delivery logs and statuses for email batch ${batchId}.`}
-        />
-        <meta name="canonical" content={`/send-emails/${batchId}`} />
-      </Head>
-
-      <div className="container mx-auto min-h-screen px-4 py-8 md:px-6 lg:px-8">
+      <Container className="py-7">
         {/* Batch Header */}
         <div className="mb-8 flex items-center gap-3">
           <Package className="h-8 w-8 text-gray-600" />
@@ -170,6 +79,13 @@ export default function BatchPageClient() {
                   {successCount} / {total} sent
                 </span>
               </div>
+              <div className="flex items-center gap-2">
+                <CircleX className="h-5 w-5" />
+                <span className="font-medium">Failed:</span>
+                <span>
+                  {errorCount} / {total}
+                </span>
+              </div>
             </div>
             <div className="mt-4">
               <div className="mb-2 flex justify-between text-sm">
@@ -190,7 +106,7 @@ export default function BatchPageClient() {
           <h2 className="text-xl font-semibold tracking-tight text-gray-800">
             Email Details
           </h2>
-          {recipients.map((item, index) => {
+          {recipients?.map((item, index) => {
             return (
               <div
                 key={index}
@@ -214,11 +130,11 @@ export default function BatchPageClient() {
                     {/* {getStatusBadge(detail.status)} */}
                     <span>{item.status}</span>
                   </div>
-                  {item.messageId && (
+                  {item.message_id && (
                     <div className="text-muted-foreground flex items-center gap-2 text-sm">
                       <span className="font-medium">Message ID:</span>
                       <span className="rounded bg-gray-100 p-1 font-mono text-xs break-all">
-                        {item.messageId}
+                        {item.message_id}
                       </span>
                     </div>
                   )}
@@ -235,7 +151,7 @@ export default function BatchPageClient() {
             );
           })}
         </div>
-      </div>
+      </Container>
     </section>
   );
 }
