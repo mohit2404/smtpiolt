@@ -33,7 +33,7 @@ export default function HomePage() {
           <div>
             <h3 className="mb-2 text-xl font-semibold">Bring Your Own SMTP</h3>
             <p>
-              Use your own Gmail, Outlook, Zoho, or private SMTP. You're fully
+              Use your own Gmail, Outlook, Zoho, or private SMTP. You&apos;re fully
               in control.
             </p>
           </div>

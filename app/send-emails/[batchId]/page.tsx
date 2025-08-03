@@ -5,12 +5,12 @@ import supabase from "@/lib/supabase/client";
 import { useParams } from "next/navigation";
 import { Package, Mail, User, Tag, Info, CheckCircle2 } from "lucide-react";
 import { apiHandler } from "@/lib/class/apiHandler";
+import Head from "next/head";
 
 export default function BatchPageClient() {
   const { batchId } = useParams<{ batchId: string }>();
   const [recipients, setRecipients] = useState<any[]>([]);
   const [batch, setBatch] = useState<any>(null);
-  const [retrying, setRetrying] = useState(false);
 
   // Count
   const total = recipients.length;
@@ -18,10 +18,10 @@ export default function BatchPageClient() {
     () => recipients.filter((r) => r.status === "success").length,
     [recipients],
   );
-  const errorCount = useMemo(
-    () => recipients.filter((r) => r.status === "error").length,
-    [recipients],
-  );
+  // const errorCount = useMemo(
+  //   () => recipients.filter((r) => r.status === "error").length,
+  //   [recipients],
+  // );
 
   useEffect(() => {
     // 1. Initial fetch
@@ -88,31 +88,40 @@ export default function BatchPageClient() {
     };
   }, [batchId]);
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "success":
-        return (
-          <div className="bg-green-100 text-green-800">
-            <CheckCircle2 className="mr-1 h-3 w-3" /> Success
-          </div>
-        );
-      case "in_progress":
-        return (
-          <div className="bg-yellow-100 text-yellow-800">
-            <Info className="mr-1 h-3 w-3" /> In Progress
-          </div>
-        );
-      case "failed":
-        return <div>Failed</div>;
-      case "pending":
-        return <div>Pending</div>;
-      default:
-        return <div>{status}</div>;
-    }
-  };
+  // const getStatusBadge = (status: string) => {
+  //   switch (status) {
+  //     case "success":
+  //       return (
+  //         <div className="bg-green-100 text-green-800">
+  //           <CheckCircle2 className="mr-1 h-3 w-3" /> Success
+  //         </div>
+  //       );
+  //     case "in_progress":
+  //       return (
+  //         <div className="bg-yellow-100 text-yellow-800">
+  //           <Info className="mr-1 h-3 w-3" /> In Progress
+  //         </div>
+  //       );
+  //     case "failed":
+  //       return <div>Failed</div>;
+  //     case "pending":
+  //       return <div>Pending</div>;
+  //     default:
+  //       return <div>{status}</div>;
+  //   }
+  // };
 
   return (
     <section>
+      <Head>
+        <title>Email Delivery Logs for {batchId}</title>
+        <meta
+          name="description"
+          content={`View delivery logs and statuses for email batch ${batchId}.`}
+        />
+        <meta name="canonical" content={`/send-emails/${batchId}`} />
+      </Head>
+
       <div className="container mx-auto min-h-screen px-4 py-8 md:px-6 lg:px-8">
         {/* Batch Header */}
         <div className="mb-8 flex items-center gap-3">

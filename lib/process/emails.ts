@@ -63,7 +63,7 @@ export async function processEmailBatch(batchId: string) {
       };
 
       try {
-        const { success, messageId } = await sendSingleEmail(
+        const { messageId } = await sendSingleEmail(
           transporter,
           emailOptions,
         );
