@@ -1,30 +1,33 @@
-import {
-  createEmailTransporter,
-  formatEmailContent,
-} from "@/lib/utils/nodemailer";
+import { createEmailTransporter } from "@/lib/utils/nodemailer";
+import { getSummaryEmail } from "./defaultHTML";
+import { htmlToText } from "html-to-text";
 
 interface SendSummaryProps {
+  completedAt: string;
   to: string;
   subject: string;
   total: number;
   success: number;
   failed: number;
   batchId: string;
-  smtpConfig: any;
 }
 
 export async function sendSummaryEmail({
+  completedAt,
   to,
   subject,
   total,
   success,
   failed,
   batchId,
-  smtpConfig,
 }: SendSummaryProps) {
-  const link = `${process.env.NEXT_PUBLIC_BASE_URL}/batch/${batchId}`;
-  const summaryText = `Hello,\n\nYour bulk email task has completed.\n\nSubject: ${subject}\nTotal: ${total}\nSent: ${success}\nFailed: ${failed}\n\nView the full report here:\n${link}\n\n– Staybook Team`;
-  const { html, text } = formatEmailContent(summaryText);
+  const smtpConfig = {
+    host: process.env.NEXT_PUBLIC_SMTP_HOST!,
+    port: Number(process.env.NEXT_PUBLIC_SMTP_PORT || 465),
+    secure: true,
+    username: process.env.NEXT_PUBLIC_SMTP_USERNAME!,
+    password: process.env.NEXT_PUBLIC_SMTP_PASSWORD!,
+  };
 
   const { transporter, error } = await createEmailTransporter(smtpConfig);
   if (!transporter) {
@@ -32,12 +35,15 @@ export async function sendSummaryEmail({
     return;
   }
 
+  const actionLink = `${process.env.NEXT_PUBLIC_BASE_URL}/campaigns/${batchId}`;
+  const mail_body = getSummaryEmail(completedAt, total, success, failed, actionLink);
+
   await transporter.sendMail({
     from: smtpConfig.username,
     to,
-    subject: `Email Summary: ${subject}`,
-    html,
-    text,
+    subject: `Email Campaign Summary: ${batchId}`,
+    text: htmlToText(mail_body),
+    html: mail_body,
   });
 
   if (transporter.close) transporter.close();

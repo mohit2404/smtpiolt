@@ -12,7 +12,11 @@ export function validateSMTPConfig(config: SMTPConfig): string | null {
 export function validateEmailBatch(params: EmailBatch): string | null {
   if (!params.senderEmail) return "Sender email is required";
   if (!params.subject) return "Subject is required";
-  if (!params.message) return "Message is required";
+  if (
+    (params.emailFormat === "text" || params.emailFormat === "html") &&
+    !params.mailBody
+  )
+    return "Message is required";
   if (!params.recipients?.length) return "Recipients are required";
   if (!params.smtpConfig.host) return "SMTP host is required";
   return null;

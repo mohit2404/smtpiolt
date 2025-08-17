@@ -1,6 +1,5 @@
 import {
   createEmailTransporter,
-  formatEmailContent,
   sendSingleEmail,
 } from "@/lib/utils/nodemailer";
 import {
@@ -9,6 +8,8 @@ import {
   updateBatchStatus,
   updateEmailLogStatus,
 } from "../firebase/functions";
+import { htmlToText } from "html-to-text";
+import { sendSummaryEmail } from "../utils/sendSummary";
 
 export async function processEmailBatch(batchId: string) {
   try {
@@ -28,10 +29,9 @@ export async function processEmailBatch(batchId: string) {
       sender_email: senderEmail,
       sender_name: senderName,
       subject,
-      html_content: message,
+      mail_body: mail_body,
       smtp_config: smtpConfig,
     } = batch;
-    const { html, text } = formatEmailContent(message);
 
     if (!smtpConfig || !smtpConfig.host) {
       console.error("SMTP config missing or invalid");
@@ -54,8 +54,8 @@ export async function processEmailBatch(batchId: string) {
         from: senderName ? `${senderName} <${senderEmail}>` : senderEmail,
         to: recipient.recipient,
         subject,
-        html,
-        text,
+        text: htmlToText(mail_body),
+        html: mail_body,
       };
 
       try {
@@ -83,11 +83,24 @@ export async function processEmailBatch(batchId: string) {
       }
     }
 
+    const completedAt = new Date().toISOString();
+
     await updateBatchStatus(batchId, {
       status: "completed",
       total_sent: totalSent,
       total_failed: totalFailed,
-      completed_at: new Date().toISOString(),
+      completed_at: completedAt,
+    });
+
+    // Send summary email
+    await sendSummaryEmail({
+      completedAt,
+      to: senderEmail,
+      subject,
+      total: logs.length,
+      success: totalSent,
+      failed: totalFailed,
+      batchId,
     });
   } catch (err: any) {
     console.error("Fatal error in batch processing:", err.message || err);

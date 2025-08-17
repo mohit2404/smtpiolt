@@ -2,12 +2,14 @@
 
 import { Button } from "@/components/button";
 import { Container } from "@/components/container";
+import HTMLCompiler from "@/components/htmlcompiler";
 import { Input } from "@/components/input";
 import { Label } from "@/components/label";
 import { Modal } from "@/components/modal";
 import { Textarea } from "@/components/textarea";
 import { apiHandler } from "@/lib/class/apiHandler";
 import { EmailRecipient, SMTPConfig } from "@/lib/types";
+import { defaultHTML } from "@/lib/utils/defaultHTML";
 import {
   isFakeEmail,
   validateEmail,
@@ -17,6 +19,7 @@ import {
 import {
   CheckCircle,
   Eye,
+  File,
   Mail,
   Plus,
   Send,
@@ -26,7 +29,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { toast } from "sonner";
 
 export default function SendEmailPage() {
@@ -35,8 +38,13 @@ export default function SendEmailPage() {
   const [senderName, setSenderName] = useState("");
   const [senderEmail, setSenderEmail] = useState("");
   const [subject, setSubject] = useState("");
-  const [message, setMessage] = useState("");
   const [manualEmails, setManualEmails] = useState("");
+  const [emailFormat, setEmailFormat] = useState<"text" | "html">("text");
+  const [mailBody, setMailBody] = useState({
+    text: "",
+    html: defaultHTML,
+  });
+  const [isEditorOpen, setIsEditorOpen] = useState(false);
   const [recipients, setRecipients] = useState<EmailRecipient[]>([]);
   const [invalidEmails, setInvalidEmails] = useState<string[]>([]);
   const [smtpConfig, setSMTPConfig] = useState<SMTPConfig>({
@@ -224,7 +232,8 @@ export default function SendEmailPage() {
       senderEmail,
       senderName,
       subject,
-      message,
+      emailFormat,
+      mailBody: mailBody[emailFormat],
       recipients,
       smtpConfig,
     };
@@ -245,7 +254,7 @@ export default function SendEmailPage() {
       }
 
       // redirect to live progress view
-      router.push(`/send-emails/${data.batchId}`);
+      router.push(`/campaigns/${data.batchId}`);
     } catch (error) {
       console.error("Error sending emails:", error);
     } finally {
@@ -264,10 +273,17 @@ export default function SendEmailPage() {
     setTestingSMTP(false);
   };
 
+  const handleContentChange = useCallback((newBody: string) => {
+    setMailBody(prevContent => ({
+      ...prevContent,
+      [emailFormat]: newBody,
+    }));
+  }, [emailFormat]);
+
   return (
     <section>
-      <Container className="max-w-6xl py-7">
-        <div className="mb-8">
+      <Container className="py-7">
+        <div className="mb-5">
           <h1 className="mb-2 text-4xl font-bold text-gray-900">
             Bulk Email Sender
           </h1>
@@ -369,7 +385,7 @@ export default function SendEmailPage() {
                       </Button>
                     </div>
                   </div>
-                  <div className="scrollbar-hide max-h-28 space-y-2 overflow-y-scroll rounded-lg border border-gray-200 bg-gray-50 p-4">
+                  <div className="scrollbar-hide max-h-28 space-y-2 overflow-y-scroll rounded-lg border p-4">
                     {recipients.map((recipient, index) => (
                       <div
                         key={index}
@@ -438,7 +454,7 @@ export default function SendEmailPage() {
                 />
               </div>
 
-              <div>
+              {/* <div>
                 <Label key="message" text="Message" required />
                 <Textarea
                   id="message"
@@ -447,6 +463,64 @@ export default function SendEmailPage() {
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                 />
+              </div> */}
+              <div>
+                <div className="mb-2 flex items-center justify-between">
+                  <Label key="message" text="Message" required />
+                  {/* Tab buttons to switch between Text and HTML */}
+                  <div className="flex items-center rounded-lg border bg-gray-100 p-0.5">
+                    <Button
+                      size="sm"
+                      variant={emailFormat !== "text" ? "outline" : "default"}
+                      onClick={() => setEmailFormat("text")}
+                      className={`${emailFormat === "text" ? "" : "border-0 !bg-gray-100"}`}
+                    >
+                      Text
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant={emailFormat !== "html" ? "outline" : "default"}
+                      onClick={() => {
+                        setEmailFormat("html");
+                        setIsEditorOpen(true);
+                      }}
+                      className={`${emailFormat === "html" ? "" : "border-0 !bg-gray-100"}`}
+                    >
+                      HTML
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Conditionally render the Textarea or the HTML Editor */}
+                {emailFormat === "text" && (
+                  <Textarea
+                    id="message"
+                    placeholder="Your email message..."
+                    rows={6}
+                    value={mailBody[emailFormat]}
+                    onChange={(e) => handleContentChange(e.target.value)}
+                  />
+                )}
+
+                {emailFormat === "html" && (
+                  <div className="min-h-40">
+                    <Button
+                      variant="outline"
+                      className="flex items-center gap-1"
+                      onClick={() => setIsEditorOpen(true)}
+                    >
+                      <File className="h-3 w-3" />
+                      index.html
+                    </Button>
+                    {isEditorOpen && (
+                      <HTMLCompiler
+                        value={mailBody[emailFormat]}
+                        onChange={handleContentChange}
+                        onClose={() => setIsEditorOpen(false)}
+                      />
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex gap-2">
@@ -566,7 +640,7 @@ export default function SendEmailPage() {
                   />
                   <label
                     htmlFor="react-option"
-                    className="inline-flex items-center justify-between py-1.5 w-full border border-gray-300 rounded-lg cursor-pointer peer-checked:border-green-500 hover:text-gray-600 peer-checked:text-green-500 hover:bg-gray-50"
+                    className="inline-flex items-center justify-between py-1.5 w-full border rounded-lg cursor-pointer peer-checked:border-green-500 hover:text-gray-600 peer-checked:text-green-500 hover:bg-gray-50"
                   >
                     <div className="w-full text-lg font-semibold">True</div>
                   </label>

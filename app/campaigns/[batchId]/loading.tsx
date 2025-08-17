@@ -25,7 +25,7 @@ export default function Loading() {
         <div className="animate-pulse rounded-xl border p-6 shadow-lg">
           <div className="mb-4 h-6 w-48 rounded bg-gray-200"></div>
           <div className="grid gap-4">
-            <div className="grid grid-cols-1 gap-x-8 gap-y-4 md:grid-cols-2">
+            <div className="grid grid-cols-1 gap-x-8 gap-y-4 lg:grid-cols-2">
               {Array.from({ length: 6 }).map((_, i) => {
                 const Icon = icons[i];
                 return (
@@ -55,9 +55,9 @@ export default function Loading() {
           {Array.from({ length: 2 }).map((_, index) => (
             <div
               key={index}
-              className="animate-pulse border-gray-200 shadow-md"
+              className="animate-pulse shadow-md"
             >
-              <div className="grid gap-2 p-6">
+              <div className="p-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <Mail className="h-5 w-5 text-gray-300" />
                   <div className="h-4 w-20 rounded bg-gray-200"></div>

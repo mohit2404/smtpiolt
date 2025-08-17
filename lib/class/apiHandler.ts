@@ -20,7 +20,8 @@ class ApiHandler {
         senderEmail: params.senderEmail,
         senderName: params.senderName,
         subject: params.subject,
-        message: params.message,
+        emailFormat: params.emailFormat,
+        mailBody: params.mailBody,
         recipients: params.recipients,
         smtpConfig: params.smtpConfig,
       });

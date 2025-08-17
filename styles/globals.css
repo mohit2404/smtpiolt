@@ -26,8 +26,12 @@ body {
 }
 
 @layer base {
-  .border {
-    @apply border border-gray-300;
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-300, currentColor);
   }
 }
 

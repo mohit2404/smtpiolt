@@ -10,12 +10,13 @@ export async function POST(req: Request) {
       senderEmail,
       senderName,
       subject,
-      message,
+      emailFormat,
+      mailBody,
       smtpConfig,
       recipients,
     } = await req.json();
 
-    if (!senderEmail || !subject || !message || !recipients?.length) {
+    if (!senderEmail || !subject || !mailBody || !recipients?.length) {
       return NextResponse.json(
         { error: "Missing required fields" },
         { status: 400 },
@@ -28,7 +29,8 @@ export async function POST(req: Request) {
       sender_email: senderEmail,
       sender_name: senderName || null,
       subject,
-      html_content: message,
+      email_format: emailFormat,
+      mail_body: mailBody,
       smtp_config: smtpConfig || {},
       status: "in_progress",
       total_sent: 0,

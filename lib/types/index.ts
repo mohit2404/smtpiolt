@@ -27,7 +27,8 @@ export interface EmailBatch {
   senderEmail: string;
   senderName: string;
   subject: string;
-  message: string;
+  emailFormat: "text" | "html";
+  mailBody: string;
   recipients: EmailRecipient[];
   smtpConfig: SMTPConfig;
 }
@@ -47,7 +48,8 @@ export interface Batch {
   sender_email: string;
   sender_name?: string;
   subject: string;
-  html_content: string;
+  email_format: "text" | "html";
+  mail_body: string;
   smtp_config?: any;
   status: string;
   total_sent: number;

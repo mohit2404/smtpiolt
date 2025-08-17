@@ -48,10 +48,3 @@ export async function sendSingleEmail(
     };
   }
 }
-
-export function formatEmailContent(message: string) {
-  return {
-    html: message.replace(/\n/g, "<br>"),
-    text: message,
-  };
-}

@@ -11,7 +11,7 @@ export const Container = forwardRef<HTMLDivElement, ContainerProps>(
     return (
       <div
         ref={ref}
-        className={`container mx-auto max-w-5xl ${className}`}
+        className={`container mx-auto p-4 sm:p-10 max-w-6xl ${className}`}
         {...props}
       >
         {children}
