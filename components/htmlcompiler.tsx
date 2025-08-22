@@ -41,11 +41,11 @@ export default function HTMLCompiler({
 
     try {
       editor.layout();
-    } catch (error) {
-      if (error instanceof Error && error.message.includes("ResizeObserver")) {
+    } catch (error: any) {
+      if (error instanceof Error && error?.message.includes("ResizeObserver")) {
         return;
       }
-      console.warn("Editor layout error:", error);
+      console.warn("Editor layout error:", error?.message || error);
     }
   };
 
@@ -55,10 +55,10 @@ export default function HTMLCompiler({
     const handleResize = () => {
       try {
         editorRef.current?.layout();
-      } catch (error) {
+      } catch (error: any) {
         if (
           error instanceof Error &&
-          error.message.includes("ResizeObserver")
+          error?.message.includes("ResizeObserver")
         ) {
           return;
         }
@@ -86,8 +86,8 @@ export default function HTMLCompiler({
       });
       setHtmlCode(formattedCode);
       onChange(formattedCode);
-    } catch (error) {
-      console.error("Error formatting code:", error);
+    } catch (error: any) {
+      console.error("Error formatting code:", error?.message || error);
     }
   };
 

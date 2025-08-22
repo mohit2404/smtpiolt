@@ -123,8 +123,8 @@ export default function SendEmailPage() {
 
       // Optional: Show user any rejected emails
       setInvalidEmails(rejectedEmails);
-    } catch (error) {
-      console.error("Error parsing file:", error);
+    } catch (error: any) {
+      console.error("Error parsing file:", error?.message || error);
     }
   };
 
@@ -255,8 +255,8 @@ export default function SendEmailPage() {
 
       // redirect to live progress view
       router.push(`/campaigns/${data.batchId}`);
-    } catch (error) {
-      console.error("Error sending emails:", error);
+    } catch (error: any) {
+      console.error("Error sending emails:", error?.message || error);
     } finally {
       setSending(false);
     }
@@ -273,12 +273,15 @@ export default function SendEmailPage() {
     setTestingSMTP(false);
   };
 
-  const handleContentChange = useCallback((newBody: string) => {
-    setMailBody(prevContent => ({
-      ...prevContent,
-      [emailFormat]: newBody,
-    }));
-  }, [emailFormat]);
+  const handleContentChange = useCallback(
+    (newBody: string) => {
+      setMailBody((prevContent) => ({
+        ...prevContent,
+        [emailFormat]: newBody,
+      }));
+    },
+    [emailFormat],
+  );
 
   return (
     <section>

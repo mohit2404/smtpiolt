@@ -65,8 +65,8 @@ export async function POST(req: Request) {
       { batchId, message: "Processing started" },
       { status: 200 },
     );
-  } catch (err: any) {
-    console.error("Error:", err);
-    return NextResponse.json({ error: err.message }, { status: 500 });
+  } catch (error: any) {
+    console.error("Error:", error?.message || error);
+    return NextResponse.json({ error: error?.message || error }, { status: 500 });
   }
 }

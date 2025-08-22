@@ -20,13 +20,13 @@ export async function createEmailTransporter(smtpConfig: SMTPConfig) {
 
     await transporter.verify();
     return { transporter, error: null };
-  } catch (error) {
-    console.error("Failed to create email transporter:", error);
+  } catch (error: any) {
+    console.error("Failed to create email transporter:", error?.message || error);
     return {
       transporter: null,
       error:
         error instanceof Error
-          ? error.message
+          ? error?.message
           : "Failed to create email transporter",
     };
   }
@@ -39,12 +39,12 @@ export async function sendSingleEmail(
   try {
     const info = await transporter.sendMail(emailOptions);
     return { success: true, messageId: info.messageId, error: null };
-  } catch (error) {
-    console.error("Failed to send email:", error);
+  } catch (error: any) {
+    console.error("Failed to send email:", error?.message || error);
     return {
       success: false,
       messageId: null,
-      error: error instanceof Error ? error.message : "Failed to send email",
+      error: error instanceof Error ? error?.message : "Failed to send email",
     };
   }
 }

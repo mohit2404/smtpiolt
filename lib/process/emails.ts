@@ -69,13 +69,13 @@ export async function processEmailBatch(batchId: string) {
         });
 
         totalSent++;
-      } catch (err: any) {
-        console.error(`Failed to send to ${recipient.recipient}:`, err.message);
+      } catch (error: any) {
+        console.error(`Failed to send to ${recipient.recipient}:`, error?.message || error);
 
         await updateEmailLogStatus(batchId, recipient.recipient, {
           status: "error",
           message_id: null,
-          error: err.message || "Unknown error",
+          error: error?.message || error,
           updated_at: new Date().toISOString(),
         });
 
@@ -102,8 +102,8 @@ export async function processEmailBatch(batchId: string) {
       failed: totalFailed,
       batchId,
     });
-  } catch (err: any) {
-    console.error("Fatal error in batch processing:", err.message || err);
+  } catch (error: any) {
+    console.error("Fatal error in batch processing:", error?.message || error);
     return;
   }
 }

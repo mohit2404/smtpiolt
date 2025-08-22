@@ -42,12 +42,12 @@ export async function POST(request: NextRequest) {
       success: true,
       message: "SMTP connection successful",
     });
-  } catch (error) {
-    console.error("SMTP test error:", error);
+  } catch (error: any) {
+    console.error("SMTP test error:", error?.message || error);
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "SMTP test failed",
+        error: error instanceof Error ? error?.message : "SMTP test failed",
       },
       { status: 500 }
     );

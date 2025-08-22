@@ -107,12 +107,12 @@ export const getBatchById = async (batchId: string) => {
       error: null,
     };
   } catch (error: any) {
-    console.error("Error fetching batch:", error.message || error);
+    console.error("Error fetching batch:", error?.message || error);
     return {
       status: false,
       message: "Failed to fetch batch",
       data: null,
-      error: error.message || error,
+      error: error?.message || error,
     };
   }
 };
@@ -148,12 +148,12 @@ export const getBatchEmailLogs = async (batchId: string) => {
       error: null,
     };
   } catch (error: any) {
-    console.error("Error fetching batch logs:", error.message || error);
+    console.error("Error fetching batch logs:", error?.message || error);
     return {
       status: false,
       message: "Failed to fetch batch logs",
       data: null,
-      error: error.message || error,
+      error: error?.message || error,
     };
   }
 };

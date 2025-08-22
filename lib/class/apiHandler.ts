@@ -7,8 +7,8 @@ class ApiHandler {
     try {
       const res = await apiClient.post(`/api/test-smtp`, { smtpConfig });
       return res.data;
-    } catch (error) {
-      console.error("Error in testSmtpConnection:", error);
+    } catch (error: any) {
+      console.error("Error in testSmtpConnection:", error?.message || error);
       throw error;
     }
   }
@@ -26,8 +26,8 @@ class ApiHandler {
         smtpConfig: params.smtpConfig,
       });
       return res.data;
-    } catch (error) {
-      console.error("Error in processEmailBatch:", error);
+    } catch (error: any) {
+      console.error("Error in processEmailBatch:", error?.message || error);
       throw error;
     }
   }
