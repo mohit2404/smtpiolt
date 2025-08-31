@@ -1,11 +1,20 @@
 import "@/styles/globals.css";
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { EB_Garamond, Geist } from "next/font/google";
 import Sonner from "@/components/sonner";
+import PWAInit from "@/components/pwa-init";
+import IOSInstallPrompt from "@/components/IOSInstallPrompt";
 
-const inter = Inter({
-  variable: "--font-inter",
+const geistSans = Geist({
   subsets: ["latin"],
+  display: "swap",
+  variable: "--font-geist-sans",
+});
+
+const ebGaramond = EB_Garamond({
+  subsets: ["latin"],
+  display: "swap",
+  variable: "--font-heading-serif",
 });
 
 export const metadata: Metadata = {
@@ -36,12 +45,14 @@ export const metadata: Metadata = {
     follow: true,
     nocache: false,
   },
+  manifest: "/manifest.webmanifest",
   icons: {
-    icon: "/favicon.ico",
-    shortcut: "/favicon.ico",
-    apple: "/apple-icon.png",
+    icon: [
+      { url: "/icons/icon-192x192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icons/icon-512x512.png", sizes: "512x512", type: "image/png" },
+    ],
+    apple: { url: "/icons/icon-192x192.png" },
   },
-  manifest: "/manifest.json",
   openGraph: {
     title: "Smtpilot – Smart Email Campaign Manager",
     description:
@@ -72,6 +83,7 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/",
   },
+  generator: "Smtpilot",
 };
 
 export default function RootLayout({
@@ -80,16 +92,18 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <head>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <meta name="apple-mobile-web-app-title" content="Smtpilot" />
         <meta name="theme-color" content="#000000" />
-        <link rel="manifest" href="/manifest.json" />
-        <link rel="apple-touch-icon" href="/icons/icon-192x192.png" />
       </head>
-      <body className={`${inter.variable} antialiased`}>
+      <body
+        className={`${geistSans.variable} ${ebGaramond.variable} antialiased`}
+      >
         {children}
+        <PWAInit />
+        <IOSInstallPrompt />
         <Sonner />
       </body>
     </html>

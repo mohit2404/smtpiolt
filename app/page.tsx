@@ -19,7 +19,6 @@ export default function HomePage() {
             <Link
               href="/send-emails"
               className="inline-grid h-10 w-full place-items-center rounded-full border px-6 text-sm font-medium tracking-wide transition-colors duration-300 hover:border-transparent hover:bg-gray-100 sm:h-12 sm:w-auto sm:text-base md:w-fit"
-              target="_blank"
               rel="noopener noreferrer"
             >
               Send Emails
@@ -33,8 +32,8 @@ export default function HomePage() {
           <div>
             <h3 className="mb-2 text-xl font-semibold">Bring Your Own SMTP</h3>
             <p>
-              Use your own Gmail, Outlook, Zoho, or private SMTP. You&apos;re fully
-              in control.
+              Use your own Gmail, Outlook, Zoho, or private SMTP. You&apos;re
+              fully in control.
             </p>
           </div>
           <div>
